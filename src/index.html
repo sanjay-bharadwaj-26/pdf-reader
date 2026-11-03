@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Reader</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="toolbar">
+  <div class="left">
+    <button id="btnSidebar" class="icon" title="Toggle sidebar">
+      <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <span id="title">PDF Reader</span>
+  </div>
+
+  <div class="center">
+    <div class="group">
+      <input id="pageInput" class="field" type="text" inputmode="numeric" value="" aria-label="Page number">
+      <span class="slash">/</span><span id="pageCount">0</span>
+    </div>
+    <span class="divider"></span>
+    <div class="group">
+      <button id="btnZoomOut" class="icon" title="Zoom out"><svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg></button>
+      <input id="zoomInput" class="field wide" type="text" value="100%" aria-label="Zoom">
+      <button id="btnZoomIn" class="icon" title="Zoom in"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>
+    </div>
+    <span class="divider"></span>
+    <div class="group">
+      <button id="btnFit" class="icon" title="Fit to page">
+        <svg viewBox="0 0 24 24"><path d="M17 4h3c1.1 0 2 .9 2 2v2h-2V6h-3V4zM4 8V6h3V4H4c-1.1 0-2 .9-2 2v2h2zm16 8v2h-3v2h3c1.1 0 2-.9 2-2v-2h-2zM7 18H4v-2H2v2c0 1.1.9 2 2 2h3v-2zM18 8H6v8h12V8z"/></svg>
+      </button>
+      <button id="btnRotate" class="icon" title="Rotate counterclockwise">
+        <svg viewBox="0 0 24 24"><path d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03L7.1 18.32zM13 4.07V1L8.45 5.55 13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93z"/></svg>
+      </button>
+    </div>
+    <span class="divider"></span>
+    <button id="btnTheme" class="icon" title="Invert page colors (Ctrl+D)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18V4c4.41 0 8 3.59 8 8s-3.59 8-8 8z"/></svg>
+    </button>
+  </div>
+
+  <div class="right">
+    <button id="btnSave" class="icon" title="Download (Ctrl+S)"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+    <button id="btnPrint" class="icon" title="Print (Ctrl+P)"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></button>
+    <button id="btnMore" class="icon" title="More actions"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+  </div>
+</header>
+
+<div id="menu" hidden>
+  <button data-act="open">Open file…<kbd>Ctrl+O</kbd></button>
+  <button data-act="invert">Invert page colors<kbd>Ctrl+D</kbd></button>
+  <button data-act="present">Present<kbd>F11</kbd></button>
+  <button data-act="props">Document properties…</button>
+</div>
+
+<main id="main">
+  <aside id="sidebar" hidden></aside>
+  <div id="viewer" tabindex="-1">
+    <div id="pages"></div>
+    <div id="empty">
+      <p>Drop a PDF here</p>
+      <p class="sub">or press <kbd>Ctrl</kbd>+<kbd>O</kbd> to open one</p>
+    </div>
+  </div>
+</main>
+
+<div id="printArea"></div>
+<div id="toast" hidden></div>
+
+<dialog id="pwdDialog">
+  <form method="dialog">
+    <p id="pwdMsg">This document is password protected.</p>
+    <input id="pwdInput" type="password" autocomplete="off" placeholder="Password">
+    <div class="row"><button value="cancel" type="submit" id="pwdCancel">Cancel</button><button value="ok" type="submit" id="pwdOk">Open</button></div>
+  </form>
+</dialog>
+
+<dialog id="propsDialog">
+  <form method="dialog">
+    <h3>Document properties</h3>
+    <dl id="propsList"></dl>
+    <div class="row"><button>Close</button></div>
+  </form>
+</dialog>
+
+<input id="fileInput" type="file" accept="application/pdf,.pdf" hidden>
+<script type="module" src="app.js"></script>
+</body>
+</html>
