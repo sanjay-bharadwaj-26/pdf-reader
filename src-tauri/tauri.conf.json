@@ -17,7 +17,8 @@
         "minWidth": 600,
         "minHeight": 400,
         "dragDropEnabled": true,
-        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,WebContentsForceDark --enable-low-end-device-mode"
+        "zoomHotkeysEnabled": true,
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,WebContentsForceDark"
       }
     ],
     "security": {

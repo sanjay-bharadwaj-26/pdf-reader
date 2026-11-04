@@ -102,10 +102,25 @@ class Pane {
 
     this.observer = new IntersectionObserver((es) => this.onIntersect(es), { root: this.viewer, rootMargin: '60% 0px 60% 0px' });
     this.viewer.addEventListener('scroll', () => this.updateCurrent(), { passive: true });
-    this.viewer.addEventListener('wheel', (e) => {
+    this.viewer.addEventListener('wheel', (e) => {       // Ctrl+wheel and touchpad pinch (sent as Ctrl+wheel)
       if (!e.ctrlKey) return;
-      e.preventDefault(); if (activePane !== this) setActive(this); this.stepZoom(e.deltaY < 0 ? 1 : -1);
+      e.preventDefault(); if (activePane !== this) setActive(this);
+      const notch = e.deltaMode !== 0 || Math.abs(e.deltaY) >= 50;      // mouse wheel click vs. smooth pinch trickle
+      if (notch) this.stepZoom(e.deltaY < 0 ? 1 : -1);
+      else this.pinchZoom(Math.exp(-clamp(e.deltaY, -25, 25) * 0.01));
     }, { passive: false });
+    {                                                    // two-finger pinch on a touchscreen
+      const pts = new Map(); let last = 0;
+      const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
+      this.viewer.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') { pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 2) last = dist(); } });
+      this.viewer.addEventListener('pointermove', (e) => {
+        if (!pts.has(e.pointerId)) return;
+        pts.set(e.pointerId, [e.clientX, e.clientY]);
+        if (pts.size === 2 && last > 0) { const n = dist(); this.pinchZoom(n / last); last = n; }
+      });
+      const up = (e) => { pts.delete(e.pointerId); };
+      this.viewer.addEventListener('pointerup', up); this.viewer.addEventListener('pointercancel', up);
+    }
     this.root.addEventListener('pointerdown', () => { if (activePane !== this) setActive(this); }, true);
     new ResizeObserver(() => {           // re-fit when the pane changes size (window, sidebar, split)
       cancelAnimationFrame(this.roRaf);
@@ -241,6 +256,13 @@ class Pane {
     if (rerender) this.scheduleRender();
     if (this === activePane) { applyThumbSizes(); refreshUI(); }
     queueSave(d);
+  }
+
+  pinchZoom(factor) {                    // smooth zoom: collect gesture events, apply once per frame
+    const d = this.doc; if (!d?.pdf) return;
+    this.pz = clamp((this.pz ?? d.zoom) * factor, 0.1, 5);
+    if (this.pzRaf) return;
+    this.pzRaf = requestAnimationFrame(() => { this.pzRaf = 0; const z = this.pz; this.pz = null; this.setZoom(z); });
   }
 
   setZoom(z, fit = null) { const d = this.doc; if (!d?.pdf) return; d.fit = fit; d.zoom = clamp(z, 0.1, 5); this.relayout(); }
@@ -446,7 +468,14 @@ function refreshUI() {
   if (document.activeElement !== el.zoomInput) el.zoomInput.value = Math.round(d.zoom * 100) + '%';
   el.btnFit.title = d.fit === 'page' ? 'Fit to width' : 'Fit to page';
   thumbs.forEach((t) => t.wrap.classList.toggle('sel', t.num === d.current));
-  if (!el.sidebar.hidden) thumbs[d.current - 1]?.wrap.scrollIntoView({ block: 'nearest' });
+  if (!el.sidebar.hidden) {                // keep the current thumbnail in view (manual: scrollIntoView can shift the whole window)
+    const w = thumbs[d.current - 1]?.wrap, sb = el.sidebar;
+    if (w) {
+      const top = w.offsetTop, bot = top + w.offsetHeight;
+      if (top < sb.scrollTop) sb.scrollTop = top - 8;
+      else if (bot > sb.scrollTop + sb.clientHeight) sb.scrollTop = bot - sb.clientHeight + 8;
+    }
+  }
   if (T && lastWinTitle !== d.name) { lastWinTitle = d.name; T.window.getCurrentWindow().setTitle(d.name).catch(() => {}); }
 }
 let lastWinTitle = '';
@@ -469,7 +498,11 @@ function renderTabs() {
     t.addEventListener('contextmenu', (e) => { e.preventDefault(); showTabMenu(e, d); });
     el.tabs.appendChild(t);
   }
-  el.tabs.querySelector('.tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  const act = el.tabs.querySelector('.tab.active');
+  if (act) {
+    const l = act.offsetLeft, r = l + act.offsetWidth, t = el.tabs;
+    if (l < t.scrollLeft) t.scrollLeft = l; else if (r > t.scrollLeft + t.clientWidth) t.scrollLeft = r - t.clientWidth;
+  }
 }
 
 function showTabMenu(e, d) {
@@ -1076,5 +1109,12 @@ if (T) {
 }
 
 setBackdrop(backdrop);
+// Never let the browser zoom the whole window (toolbar included) on Ctrl+wheel / pinch; the viewer handles it itself.
+document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false, capture: true });
+// The page itself must never scroll (programmatic scrolling can otherwise shift the whole layout).
+window.addEventListener('scroll', () => { if (window.scrollX || window.scrollY) window.scrollTo(0, 0); });
+// If anything fails, show it instead of leaving a dead screen.
+window.addEventListener('error', (e) => toast('Error: ' + (e.message || 'unknown'), 8000));
+window.addEventListener('unhandledrejection', (e) => toast('Error: ' + (e.reason?.message || e.reason || 'unknown'), 8000));
 window.addEventListener('beforeunload', () => docs.forEach((d) => { if (d.pane) d.scroll = d.pane.viewer.scrollTop; saveState(d); }));
 setActive(panes[0]);

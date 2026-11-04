@@ -52,4 +52,4 @@ Find in document (`Ctrl+F`), annotations/draw/undo/redo, two-page view, form fil
 
 ## Optional: even lower RAM
 
-`tauri.conf.json` passes `--enable-low-end-device-mode` to WebView2. If scrolling feels less smooth on your machine, remove that flag.
+Close PDFs you are not using; hidden tabs already free their rendered pages.
