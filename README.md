@@ -36,7 +36,11 @@ Quick test without Rust: after `npm install`, run `npx serve src` (or `python -m
 ## Features
 
 - Chromium-style dark toolbar: sidebar toggle, file name, page box `n / total`, zoom -/+ with editable percentage, fit page/width, rotate, download, print, menu
-- **Invert colors** button (toolbar, `Ctrl+D`, or the menu). Works both ways: white PDFs become dark, dark PDFs become light. Hues are preserved so images stay recognisable. The choice is remembered.
+- **Invert colors** button (toolbar, `Ctrl+D`, or the menu), applied per tab. Works both ways: white PDFs become dark, dark PDFs become light. Hues are preserved so images stay recognisable. New tabs start with whatever you used last.
+- **Tabs:** every opened PDF gets its own tab (middle-click or × to close, right-click for more, `Ctrl+W` close, `Ctrl+Tab` next tab). PDFs opened from Explorer while the app is running join the same window as new tabs. Each tab remembers its own zoom, scroll position and color inversion.
+- **Split view** (`Ctrl+\` or the toolbar button): two PDFs side by side. Click a pane to make it active (the toolbar acts on the active pane). Right-click a tab → *Open in left/right pane*, or drop a file onto a pane. Drag the divider to resize; double-click it to reset.
+- **Word documents (.docx)** open in tabs like PDFs (zoom, fit, themes, find, print, "Open with"). They are rendered to HTML, so page breaks and some complex layouts can differ slightly from Word. Old `.doc` files are not supported (save them as .docx first). Word files can't be rendered page-by-page, so very large documents use more RAM than PDFs.
+- **Themes** per tab: Original, Dark, Black, Dark (no colors), Sepia, plus a choice of dark backdrop color (Charcoal, Slate blue, Warm brown, Near black), all from the ⋮ menu. `Ctrl+F` finds text in the document.
 - Thumbnail sidebar, selectable/copyable text, password-protected PDFs
 - Zoom steps identical to Chromium (25%-500%), `Ctrl+wheel`, `Ctrl+ +/-/0`
 - `Ctrl+O` open, `Ctrl+S` save a copy, `Ctrl+P` print, `F11` present, drag and drop, "Open with" from Explorer

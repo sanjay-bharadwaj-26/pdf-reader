@@ -17,7 +17,7 @@
         "minWidth": 600,
         "minHeight": 400,
         "dragDropEnabled": true,
-        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --enable-low-end-device-mode"
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,WebContentsForceDark --enable-low-end-device-mode"
       }
     ],
     "security": {
@@ -44,6 +44,12 @@
         "name": "PDF Document",
         "role": "Viewer",
         "mimeType": "application/pdf"
+      },
+      {
+        "ext": ["docx"],
+        "name": "Word Document",
+        "role": "Viewer",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       }
     ]
   }

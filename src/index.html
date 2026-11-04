@@ -7,6 +7,11 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="tabbar">
+  <div id="tabs"></div>
+  <button id="btnNewTab" title="Open file in new tab (Ctrl+O)">+</button>
+</div>
+
 <header id="toolbar">
   <div class="left">
     <button id="btnSidebar" class="icon" title="Toggle sidebar">
@@ -36,9 +41,14 @@
       </button>
     </div>
     <span class="divider"></span>
-    <button id="btnTheme" class="icon" title="Invert page colors (Ctrl+D)">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18V4c4.41 0 8 3.59 8 8s-3.59 8-8 8z"/></svg>
-    </button>
+    <div class="group">
+      <button id="btnTheme" class="icon" title="Dark mode on / off for this tab (Ctrl+D). More themes in the ⋮ menu">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18V4c4.41 0 8 3.59 8 8s-3.59 8-8 8z"/></svg>
+      </button>
+      <button id="btnSplit" class="icon" title="Split view: two PDFs side by side (Ctrl+\)">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm8 16H5V5h6v14zm8 0h-6V5h6v14z"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="right">
@@ -48,25 +58,31 @@
   </div>
 </header>
 
-<div id="menu" hidden>
-  <button data-act="open">Open file…<kbd>Ctrl+O</kbd></button>
-  <button data-act="invert">Invert page colors<kbd>Ctrl+D</kbd></button>
+<div id="findbar" hidden>
+  <input id="findInput" type="text" placeholder="Find in document" autocomplete="off" spellcheck="false">
+  <span id="findCount"></span>
+  <button id="findPrev" class="icon" title="Previous (Shift+Enter)"><svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg></button>
+  <button id="findNext" class="icon" title="Next (Enter)"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg></button>
+  <button id="findClose" class="icon" title="Close (Esc)"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+</div>
+
+<div id="menu" class="popup" hidden>
+  <button data-act="open">Open file in new tab…<kbd>Ctrl+O</kbd></button>
+  <button data-act="close">Close tab<kbd>Ctrl+W</kbd></button>
+  <button data-act="split">Split view<kbd>Ctrl+\</kbd></button>
+  <button data-act="invert">Dark mode on / off<kbd>Ctrl+D</kbd></button>
   <button data-act="present">Present<kbd>F11</kbd></button>
   <button data-act="props">Document properties…</button>
 </div>
+<div id="tabMenu" class="popup" hidden></div>
 
 <main id="main">
   <aside id="sidebar" hidden></aside>
-  <div id="viewer" tabindex="-1">
-    <div id="pages"></div>
-    <div id="empty">
-      <p>Drop a PDF here</p>
-      <p class="sub">or press <kbd>Ctrl</kbd>+<kbd>O</kbd> to open one</p>
-    </div>
-  </div>
+  <div id="panes"></div>
 </main>
 
 <div id="printArea"></div>
+<div id="docxStage"></div>
 <div id="toast" hidden></div>
 
 <dialog id="pwdDialog">
@@ -85,7 +101,7 @@
   </form>
 </dialog>
 
-<input id="fileInput" type="file" accept="application/pdf,.pdf" hidden>
+<input id="fileInput" type="file" accept="application/pdf,.pdf,.docx" multiple hidden>
 <script type="module" src="app.js"></script>
 </body>
 </html>
